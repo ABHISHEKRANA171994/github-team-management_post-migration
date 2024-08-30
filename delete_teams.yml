@@ -1,0 +1,39 @@
+name: Delete Teams from Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      org_name:
+        description: "GitHub Organization Name"
+        required: true
+        default: "your_org_name"
+      team_file:
+        description: "File containing list of repositories and teams to delete"
+        required: true
+        type: artifact
+
+jobs:
+  delete-teams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Download team list file
+        uses: actions/download-artifact@v3
+        with:
+          name: team_file
+          path: .
+
+      - name: Run script to delete teams from repositories
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_NAME: ${{ github.event.inputs.org_name }}
+        run: |
+          python delete_teams.py
